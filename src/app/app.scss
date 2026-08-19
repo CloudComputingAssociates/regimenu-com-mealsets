@@ -32,9 +32,10 @@
 .brand:hover {
   text-decoration: none;
 }
-.brand__mark {
-  color: var(--ms-accent);
-  font-size: 20px;
+.brand__logo {
+  height: 30px;
+  width: auto;
+  display: block;
 }
 .brand__name {
   font-family: 'Fredoka', 'Inter', sans-serif;

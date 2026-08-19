@@ -13,5 +13,6 @@ export const environment = {
     clientId: 'FILL_ME', // Auth0 SPA application client id (same app as regi-app)
     audience: 'FILL_ME', // e.g. https://api.regimenu.net
   },
-  cockpitUrl: 'https://app.regimenu.com',
+  cockpitUrl: 'https://app.regimenu.com', // post-purchase / owner destinations only
+  signupUrl: 'https://signup.regimenu.com', // public "Get the RegiMenu app" funnel (NYI)
 };

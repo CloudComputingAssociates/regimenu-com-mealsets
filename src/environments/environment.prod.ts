@@ -9,5 +9,6 @@ export const environment = {
     clientId: '9KHWGCfSSg9wUr1oREiUYIgP15EDIppJ',
     audience: 'https://api.regimenu.net',
   },
-  cockpitUrl: 'https://app.regimenu.com',
+  cockpitUrl: 'https://app.regimenu.com', // post-purchase / owner destinations only
+  signupUrl: 'https://signup.regimenu.com', // public "Get the RegiMenu app" funnel (NYI)
 };

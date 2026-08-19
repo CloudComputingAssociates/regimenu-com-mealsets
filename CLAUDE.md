@@ -9,3 +9,4 @@ conventions.
 - Terse commit messages. A one-line subject; a short body only when it adds
   something the subject can't. No novels.
 - Do NOT add a `Co-Authored-By` trailer.
+- Always provide a commit message after making changes, without being asked.

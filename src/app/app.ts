@@ -19,13 +19,12 @@ import { NotificationComponent } from './components/notification/notification';
       <header class="shell-header">
         <div class="ms-container shell-header__inner">
           <a routerLink="/" class="brand" aria-label="RegiMenu MealSets home">
-            <span class="brand__mark">◈</span>
-            <span class="brand__name">MealSets</span>
+            <img class="brand__logo" src="/images/yeh_logo_dark.png" alt="" />
+            <span class="brand__name">RegiMenu MealSets</span>
           </a>
           <nav class="shell-nav">
             <a routerLink="/browse" class="shell-nav__link">Browse</a>
             @if (isAuthenticated()) {
-              <a [href]="cockpitUrl" class="shell-nav__link">My binder</a>
               <button class="ms-btn ms-btn--ghost shell-nav__btn" (click)="logout()">
                 Log out
               </button>
@@ -47,8 +46,7 @@ import { NotificationComponent } from './components/notification/notification';
           <span class="shell-footer__brand">RegiMenu MealSets</span>
           <nav class="shell-footer__links">
             <a routerLink="/browse">Browse</a>
-            <a [href]="cockpitUrl">Open the RegiMenu app</a>
-            <a [href]="cockpitUrl">app.regimenu.com</a>
+            <a [href]="signupUrl">Get the RegiMenu app</a>
           </nav>
         </div>
       </footer>
@@ -63,7 +61,7 @@ export class AppComponent {
   private router = inject(Router);
 
   readonly isAuthenticated = toSignal(this.auth.isAuthenticated$, { initialValue: false });
-  readonly cockpitUrl = environment.cockpitUrl;
+  readonly signupUrl = environment.signupUrl;
 
   constructor() {
     // After an Auth0 redirect completes, restore the page the user was on when
