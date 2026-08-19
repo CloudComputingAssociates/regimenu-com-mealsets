@@ -7,11 +7,12 @@ import { RouterOutlet, RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
 import { environment } from '../environments/environment';
+import { NotificationComponent } from './components/notification/notification';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet, RouterLink, NotificationComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
@@ -51,6 +52,8 @@ import { environment } from '../environments/environment';
           </nav>
         </div>
       </footer>
+
+      <app-notification />
     </div>
   `,
   styleUrl: './app.scss',

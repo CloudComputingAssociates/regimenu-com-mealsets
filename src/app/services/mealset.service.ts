@@ -20,6 +20,7 @@ import {
   OwnedResponse,
   AcquireResponse,
   CheckoutResponse,
+  RedownloadResponse,
   Meal,
 } from '../models/mealset.models';
 
@@ -141,6 +142,13 @@ export class MealSetService {
    *  Returns a Stripe url the browser should be redirected to. */
   checkout(id: number): Observable<CheckoutResponse> {
     return this.http.post<CheckoutResponse>(`${this.baseUrl}/${id}/checkout`, {});
+  }
+
+  /** POST /api/mealset/{id}/redownload — re-materialize only the MISSING meals
+   *  from an owned set into the binder. Idempotent; returns how many were added.
+   *  404 = the caller has no purchase of this set (surface to caller). */
+  redownload(id: number): Observable<RedownloadResponse> {
+    return this.http.post<RedownloadResponse>(`${this.baseUrl}/${id}/redownload`, {});
   }
 
   // ---- Delivered meals (Auth0, owners only) ---------------------------------

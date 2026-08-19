@@ -61,6 +61,13 @@ export interface CheckoutResponse {
   url: string;
 }
 
+/** POST /api/mealset/{id}/redownload (Auth0) — re-materializes only MISSING
+ *  meals from an owned set back into the binder (idempotent; kept/edited meals
+ *  are untouched). 404 when the caller has no purchase of the set. */
+export interface RedownloadResponse {
+  materializedCount: number;
+}
+
 /** GET /api/meal?mealSetIds={id} (Auth0, owners only). Lean — used only to count
  *  the meals delivered into the binder. Shape is intentionally permissive. */
 export interface Meal {

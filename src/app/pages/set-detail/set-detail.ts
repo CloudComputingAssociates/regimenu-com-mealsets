@@ -16,6 +16,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '@auth0/auth0-angular';
 import { MealSetService } from '../../services/mealset.service';
+import { NotificationService } from '../../services/notification.service';
 import { MealSetCatalogEntry } from '../../models/mealset.models';
 import { environment } from '../../../environments/environment';
 
@@ -82,6 +83,12 @@ import { environment } from '../../../environments/environment';
               @if (owned()) {
                 <span class="owned-badge">✓ Owned</span>
                 <a [href]="cockpitUrl" class="ms-btn ms-btn--primary">View in my binder</a>
+                <button
+                  class="ms-btn ms-btn--ghost"
+                  [disabled]="busy()"
+                  (click)="onRedownload(e)">
+                  {{ busy() ? 'Working…' : 'Re-download meals' }}
+                </button>
               } @else {
                 <span class="info__price" [class.info__price--free]="e.price === 0">
                   {{ priceLabel(e.price) }}
@@ -144,6 +151,7 @@ export class SetDetailComponent {
   private router = inject(Router);
   private svc = inject(MealSetService);
   private auth = inject(AuthService);
+  private notify = inject(NotificationService);
 
   private isAuthenticated = toSignal(this.auth.isAuthenticated$, { initialValue: false });
   readonly cockpitUrl = environment.cockpitUrl;
@@ -252,6 +260,38 @@ export class SetDetailComponent {
         error: err => this.handleAcquireError(err),
       });
     }
+  }
+
+  /** Owned-mode secondary action: re-materialize only the MISSING meals from
+   *  the set back into the binder (idempotent). Mirrors the acquire flow. */
+  onRedownload(e: MealSetCatalogEntry): void {
+    this.errorMsg.set(null);
+    this.busy.set(true);
+    this.svc.redownload(e.mealSetId).subscribe({
+      next: res => {
+        this.busy.set(false);
+        if (res.materializedCount > 0) {
+          this.notify.show(`${res.materializedCount} meals added back to your binder.`);
+          void this.router.navigate(['/purchase/delivered'], {
+            queryParams: { setId: e.mealSetId },
+          });
+        } else {
+          this.notify.show('All of this set\'s meals are already in your binder.', 'info');
+        }
+      },
+      error: err => {
+        this.busy.set(false);
+        // 404 = no purchase on record; re-confirm ownership defensively.
+        if (err instanceof HttpErrorResponse && err.status === 404) {
+          this.svc.isOwned(this.setId()).subscribe({
+            next: v => this.owned.set(v),
+            error: () => {},
+          });
+          return;
+        }
+        this.notify.show('Something went wrong. Please try again.', 'error');
+      },
+    });
   }
 
   /** 409 from acquire/checkout → already owned; flip to the owned state and
