@@ -1,0 +1,59 @@
+:host {
+  display: block;
+}
+
+.pending {
+  padding: 64px 24px;
+  display: flex;
+  justify-content: center;
+}
+.pending__card {
+  text-align: center;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.pending__cover {
+  width: 220px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: var(--ms-radius);
+  border: 1px solid var(--ms-border);
+  margin-bottom: 10px;
+}
+.pending__cover--none {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ms-surface);
+  font-size: 48px;
+  color: #c6cedd;
+}
+.pending__title {
+  font-size: 26px;
+  font-weight: 600;
+  margin: 6px 0 0;
+}
+.pending__sub {
+  color: var(--ms-ink-soft);
+  line-height: 1.6;
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--ms-border);
+  border-top-color: var(--ms-accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin: 6px 0;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

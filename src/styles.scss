@@ -1,0 +1,110 @@
+// Angular Material theme (Material 3). Mirrors regi-app's azure/blue palette so
+// the marketplace reads as the same product family as the cockpit.
+@use '@angular/material' as mat;
+
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+:root {
+  // Marketplace design tokens — typography-led, light surface.
+  --ms-bg: #ffffff;
+  --ms-surface: #f7f9fc;
+  --ms-border: #e4e8ef;
+  --ms-ink: #1a2233;
+  --ms-ink-soft: #5a6579;
+  --ms-accent: #1667d6;
+  --ms-accent-ink: #ffffff;
+  --ms-free: #157a4a;
+  --ms-radius: 14px;
+  --ms-shadow: 0 1px 2px rgba(16, 28, 48, 0.06), 0 8px 24px rgba(16, 28, 48, 0.06);
+  --ms-max: 1120px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  color-scheme: light;
+  background-color: var(--ms-bg);
+  color: var(--ms-ink);
+  font-family: 'Inter', 'Roboto', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--ms-accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+h1, h2, h3 {
+  font-family: 'Fredoka', 'Inter', sans-serif;
+  color: var(--ms-ink);
+  line-height: 1.1;
+  margin: 0;
+}
+
+// Shared layout helpers used across pages.
+.ms-container {
+  width: 100%;
+  max-width: var(--ms-max);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.ms-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: inherit;
+  font-weight: 600;
+  border: none;
+  border-radius: 999px;
+  padding: 13px 26px;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.ms-btn:active {
+  transform: translateY(1px);
+}
+.ms-btn--primary {
+  background: var(--ms-accent);
+  color: var(--ms-accent-ink);
+  box-shadow: 0 6px 16px rgba(22, 103, 214, 0.28);
+}
+.ms-btn--primary:hover {
+  background: #1257ba;
+  text-decoration: none;
+}
+.ms-btn--ghost {
+  background: transparent;
+  color: var(--ms-accent);
+  border: 1.5px solid var(--ms-border);
+}
+.ms-btn--ghost:hover {
+  border-color: var(--ms-accent);
+  text-decoration: none;
+}
+.ms-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  box-shadow: none;
+}

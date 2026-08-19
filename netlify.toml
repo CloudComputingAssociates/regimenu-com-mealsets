@@ -1,0 +1,11 @@
+# Netlify build & hosting for the public MealSets marketplace SPA.
+[build]
+  command = "npm ci && ng build"
+  publish = "dist/regi-mealsets/browser"
+
+# Single-page-app fallback: every unmatched path serves index.html so the
+# Angular router (client-side) can resolve deep links like /set/42.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
