@@ -9,7 +9,7 @@ export interface MealSetCatalogEntry {
   mealSetId: number;
   name: string;
   description?: string;
-  genre?: string;
+  genres: string[]; // always present; [] = uncategorized
   price: number; // dollars; 0 === free
   mealCount?: number; // number of meals in the set; rendered next to the name when present
 

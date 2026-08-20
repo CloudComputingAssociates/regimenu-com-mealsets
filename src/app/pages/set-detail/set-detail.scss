@@ -86,15 +86,19 @@
 }
 
 // ---- Info ------------------------------------------------------------------
+.info__genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
 .info__genre {
-  display: inline-block;
   font-size: 12px;
   font-weight: 600;
   color: var(--ms-accent);
   background: rgba(22, 103, 214, 0.09);
   padding: 4px 11px;
   border-radius: 999px;
-  margin-bottom: 12px;
 }
 .info__name {
   font-size: clamp(26px, 3.4vw, 36px);

@@ -35,20 +35,21 @@ type PriceFilter = 'all' | 'free' | 'paid';
           (click)="priceFilter.set('paid')">Paid</button>
       </div>
 
-      <!-- Filters: genre chips (client-side) + name-sort toggle -->
+      <!-- Genre chips: multi-select. "All" clears the selection; a card must
+           match EVERY selected genre (intersection). -->
       <div class="controls">
-        <div class="chips" role="tablist" aria-label="Filter by genre">
+        <div class="chips" role="group" aria-label="Filter by genre">
           <button
             class="chip"
-            [class.chip--on]="selectedGenre() === null"
-            (click)="selectedGenre.set(null)">
+            [class.chip--on]="selectedGenres().size === 0"
+            (click)="clearGenres()">
             All
           </button>
           @for (g of svc.genres(); track g) {
             <button
               class="chip"
-              [class.chip--on]="selectedGenre() === g"
-              (click)="selectedGenre.set(g)">
+              [class.chip--on]="selectedGenres().has(g)"
+              (click)="toggleGenre(g)">
               {{ g }}
             </button>
           }
@@ -63,7 +64,10 @@ type PriceFilter = 'all' | 'free' | 'paid';
       } @else if (svc.error()) {
         <p class="state state--err">{{ svc.error() }}</p>
       } @else if (visible().length === 0) {
-        <p class="state">No MealSets match this filter.</p>
+        <div class="state">
+          <p>No MealSets match all selected filters.</p>
+          <button class="ms-btn ms-btn--ghost" (click)="clearAllFilters()">Clear filters</button>
+        </div>
       } @else {
         <div class="grid">
           @for (entry of visible(); track entry.mealSetId) {
@@ -82,6 +86,7 @@ type PriceFilter = 'all' | 'free' | 'paid';
                   @if (isOwned(entry.mealSetId)) {
                     <span class="badge badge--owned">✓ Purchased</span>
                   }
+                  <span class="card__hint">Click for details</span>
                 </div>
                 <div class="card__body">
                   <div class="card__titlerow">
@@ -97,8 +102,12 @@ type PriceFilter = 'all' | 'free' | 'paid';
                   @if (entry.authorName) {
                     <p class="card__author">by {{ entry.authorName }}</p>
                   }
-                  @if (entry.genre) {
-                    <span class="card__genre">{{ entry.genre }}</span>
+                  @if (entry.genres.length) {
+                    <div class="card__genres">
+                      @for (g of entry.genres; track g) {
+                        <span class="card__genre">{{ g }}</span>
+                      }
+                    </div>
                   }
                   @if (entry.description) {
                     <p class="card__desc">{{ entry.description }}</p>
@@ -127,20 +136,25 @@ export class BrowseComponent {
   private router = inject(Router);
   private isAuthenticated = toSignal(this.auth.isAuthenticated$, { initialValue: false });
 
-  readonly selectedGenre = signal<string | null>(null);
+  /** Multi-select genre filter. Empty set = "All" (no genre filter). */
+  readonly selectedGenres = signal<ReadonlySet<string>>(new Set());
   readonly priceFilter = signal<PriceFilter>('all');
   readonly sortAsc = signal(true);
   /** mealSetId with an in-flight add-to-cart action (disables just that card). */
   readonly busyId = signal<number | null>(null);
 
-  /** Entries after price + genre filters and name sort — all client-side. */
+  /** Entries after price + genre filters and name sort — all client-side.
+   *  Genre filter is an intersection: a card must contain EVERY selected genre.
+   *  Price filter ANDs independently. */
   readonly visible = computed<MealSetCatalogEntry[]>(() => {
-    const genre = this.selectedGenre();
+    const genres = this.selectedGenres();
     const price = this.priceFilter();
     const asc = this.sortAsc();
     const list = this.svc
       .entries()
-      .filter(e => (genre === null ? true : e.genre === genre))
+      .filter(e =>
+        genres.size === 0 ? true : [...genres].every(g => e.genres.includes(g)),
+      )
       .filter(e =>
         price === 'all' ? true : price === 'free' ? e.price === 0 : e.price > 0,
       );
@@ -161,6 +175,26 @@ export class BrowseComponent {
         this.svc.loadEntitled().subscribe({ error: () => {} });
       }
     });
+  }
+
+  /** Toggle a genre in/out of the multi-select set. */
+  toggleGenre(g: string): void {
+    this.selectedGenres.update(cur => {
+      const next = new Set(cur);
+      next.has(g) ? next.delete(g) : next.add(g);
+      return next;
+    });
+  }
+
+  /** "All" — clear the genre selection (no genre filter). */
+  clearGenres(): void {
+    this.selectedGenres.set(new Set());
+  }
+
+  /** Empty-state reset: clear genres AND price filter. */
+  clearAllFilters(): void {
+    this.clearGenres();
+    this.priceFilter.set('all');
   }
 
   isOwned(id: number): boolean {

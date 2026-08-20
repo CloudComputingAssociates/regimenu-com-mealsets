@@ -150,6 +150,26 @@
   position: relative;
   aspect-ratio: 16 / 10;
   background: var(--ms-surface);
+  overflow: hidden;
+}
+// "Click for details" overlay across the bottom of the image.
+.card__hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 18px 12px 8px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: linear-gradient(to top, rgba(16, 28, 48, 0.72), rgba(16, 28, 48, 0));
+  opacity: 0.92;
+  transition: opacity 0.15s ease;
+}
+.card:hover .card__hint {
+  opacity: 1;
 }
 .card__img {
   width: 100%;
@@ -174,6 +194,8 @@
   letter-spacing: 0.08em;
   padding: 5px 12px;
   border-radius: 6px;
+  // White outline so the green flag stays legible over green imagery.
+  border: 2px solid #fff;
   box-shadow: 0 3px 10px rgba(21, 122, 74, 0.35);
 }
 .badge {
@@ -231,8 +253,12 @@
   font-size: 13px;
   margin: 0;
 }
+.card__genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 .card__genre {
-  align-self: flex-start;
   font-size: 12px;
   font-weight: 600;
   color: var(--ms-accent);

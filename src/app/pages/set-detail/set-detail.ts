@@ -72,8 +72,12 @@ import { MealListComponent } from '../../components/meal-list/meal-list';
 
           <!-- Info + CTA -->
           <div class="info">
-            @if (e.genre) {
-              <span class="info__genre">{{ e.genre }}</span>
+            @if (e.genres.length) {
+              <div class="info__genres">
+                @for (g of e.genres; track g) {
+                  <span class="info__genre">{{ g }}</span>
+                }
+              </div>
             }
             <h1 class="info__name">{{ e.name }}</h1>
             @if (e.authorName) {
