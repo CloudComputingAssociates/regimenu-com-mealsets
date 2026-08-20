@@ -39,11 +39,14 @@ export interface CatalogQuery {
   maxPrice?: number;
 }
 
-/** GET /api/mealset (Auth0) — the caller's owned sets. */
+/** GET /api/mealset (Auth0) — the caller's owned sets, ordered newest-purchase
+ *  first. `purchasedAt` is an ISO date-time. `genres` mirrors the catalog's
+ *  genres[] and is used for the shelf fallback when a set has left the catalog. */
 export interface MealSetSummary {
   mealSetId: number;
   name: string;
-  genre?: string;
+  genres?: string[];
+  purchasedAt: string;
 }
 
 /** GET /api/mealset/{id}/owned (Auth0). */

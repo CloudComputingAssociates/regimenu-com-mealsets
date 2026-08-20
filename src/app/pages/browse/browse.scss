@@ -8,7 +8,8 @@
 .browse__head {
   margin-bottom: 24px;
 }
-.browse__title {
+.browse__title,
+.section__title {
   font-size: clamp(28px, 4vw, 38px);
   font-weight: 600;
   margin: 0 0 6px;
@@ -17,6 +18,19 @@
   color: var(--ms-ink-soft);
   margin: 0;
   font-size: 16px;
+}
+
+// ---- Sections (shelf-first layout) -----------------------------------------
+.shelf {
+  margin-bottom: 44px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--ms-border);
+}
+.shelf .section__title {
+  margin-bottom: 20px;
+}
+.browse-section .browse__head {
+  margin-bottom: 20px;
 }
 
 .controls {
@@ -145,6 +159,18 @@
 }
 .card__link:hover {
   text-decoration: none;
+}
+// Shelf card is itself the link (no Add-to-Cart action) — owned sets only.
+.card--shelf {
+  color: inherit;
+}
+.card--shelf:hover {
+  text-decoration: none;
+}
+.card__added {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--ms-ink-soft);
 }
 .card__media {
   position: relative;

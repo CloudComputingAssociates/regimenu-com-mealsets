@@ -1,17 +1,25 @@
 // src/app/pages/browse/browse.ts
-// Public catalog grid. Fetches the catalog once into the shared signal store,
-// overlays entitlements when the visitor is authenticated, and filters/sorts
-// entirely client-side off the cached entries.
+// Public catalog. For authenticated owners it becomes shelf-first: a "My
+// MealSets" shelf of owned sets (newest purchase first) above a "Browse
+// MealSets" grid that EXCLUDES already-owned sets. Anonymous visitors (and
+// owners with an empty shelf) see the grid over the full catalog, as before.
 import { Component, ChangeDetectionStrategy, inject, signal, computed, effect } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '@auth0/auth0-angular';
 import { MealSetService } from '../../services/mealset.service';
-import { MealSetCatalogEntry } from '../../models/mealset.models';
+import { MealSetCatalogEntry, MealSetSummary } from '../../models/mealset.models';
 import { MealPlaceholderComponent } from '../../components/meal-placeholder/meal-placeholder';
 
 type PriceFilter = 'all' | 'free' | 'paid';
+
+/** An owned set on the shelf: its summary (order + purchase date + fallback
+ *  fields) paired with the resolved catalog entry (visuals), if still listed. */
+interface ShelfItem {
+  summary: MealSetSummary;
+  entry?: MealSetCatalogEntry;
+}
 
 @Component({
   selector: 'app-browse',
@@ -20,112 +28,153 @@ type PriceFilter = 'all' | 'free' | 'paid';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="ms-container browse">
-      <header class="browse__head">
-        <h1 class="browse__title">Browse MealSets</h1>
-        <p class="browse__sub">Chef-built meal packs, ready for your notebook.</p>
-      </header>
-
-      <!-- Price filter: conspicuous segmented control (client-side) -->
-      <div class="seg" role="group" aria-label="Filter by price">
-        <button class="seg__btn" [class.seg__btn--on]="priceFilter() === 'all'"
-          (click)="priceFilter.set('all')">All</button>
-        <button class="seg__btn seg__btn--free" [class.seg__btn--on]="priceFilter() === 'free'"
-          (click)="priceFilter.set('free')">Free</button>
-        <button class="seg__btn" [class.seg__btn--on]="priceFilter() === 'paid'"
-          (click)="priceFilter.set('paid')">Paid</button>
-      </div>
-
-      <!-- Genre chips: multi-select. "All" clears the selection; a card must
-           match EVERY selected genre (intersection). -->
-      <div class="controls">
-        <div class="chips" role="group" aria-label="Filter by genre">
-          <button
-            class="chip"
-            [class.chip--on]="selectedGenres().size === 0"
-            (click)="clearGenres()">
-            All
-          </button>
-          @for (g of svc.genres(); track g) {
-            <button
-              class="chip"
-              [class.chip--on]="selectedGenres().has(g)"
-              (click)="toggleGenre(g)">
-              {{ g }}
-            </button>
-          }
-        </div>
-        <button class="sort" (click)="toggleSort()">
-          Name {{ sortAsc() ? '▲ A–Z' : '▼ Z–A' }}
-        </button>
-      </div>
-
-      @if (svc.loading() && !svc.loaded()) {
-        <p class="state">Loading MealSets…</p>
-      } @else if (svc.error()) {
-        <p class="state state--err">{{ svc.error() }}</p>
-      } @else if (visible().length === 0) {
-        <div class="state">
-          <p>No MealSets match all selected filters.</p>
-          <button class="ms-btn ms-btn--ghost" (click)="clearAllFilters()">Clear filters</button>
-        </div>
-      } @else {
-        <div class="grid">
-          @for (entry of visible(); track entry.mealSetId) {
-            <div class="card">
-              <a class="card__link" [routerLink]="['/set', entry.mealSetId]">
+      <!-- ============ My MealSets shelf (authenticated owners only) ========= -->
+      @if (showShelf()) {
+        <section class="shelf">
+          <h1 class="section__title">My MealSets</h1>
+          <div class="grid">
+            @for (item of shelf(); track item.summary.mealSetId) {
+              <a class="card card--shelf" [routerLink]="['/set', item.summary.mealSetId]">
                 <div class="card__media">
-                  @if (entry.mealSetPic1) {
-                    <img class="card__img" [src]="entry.mealSetPic1" [alt]="entry.name" loading="lazy" />
+                  @if (item.entry?.mealSetPic1; as pic) {
+                    <img class="card__img" [src]="pic" [alt]="cardName(item)" loading="lazy" />
                   } @else {
                     <app-meal-placeholder class="card__noimg" />
                   }
-                  <!-- Free is called out with a conspicuous corner flag on the image -->
-                  @if (entry.price === 0) {
-                    <span class="flag-free">FREE</span>
-                  }
-                  @if (isOwned(entry.mealSetId)) {
-                    <span class="badge badge--owned">✓ Purchased</span>
-                  }
+                  <span class="badge badge--owned">✓ Owned</span>
                   <span class="card__hint">Click for details</span>
                 </div>
                 <div class="card__body">
-                  <div class="card__titlerow">
-                    <h2 class="card__name">
-                      {{ entry.name }}@if (entry.mealCount != null) {
-                        <span class="card__count">({{ entry.mealCount }})</span>
-                      }
-                    </h2>
-                    <span class="card__price" [class.card__price--free]="entry.price === 0">
-                      {{ priceLabel(entry.price) }}
-                    </span>
-                  </div>
-                  @if (entry.authorName) {
-                    <p class="card__author">by {{ entry.authorName }}</p>
+                  <h2 class="card__name">{{ cardName(item) }}</h2>
+                  @if (item.entry?.authorName; as author) {
+                    <p class="card__author">by {{ author }}</p>
                   }
-                  @if (entry.genres.length) {
+                  @if (cardGenres(item).length) {
                     <div class="card__genres">
-                      @for (g of entry.genres; track g) {
+                      @for (g of cardGenres(item); track g) {
                         <span class="card__genre">{{ g }}</span>
                       }
                     </div>
                   }
-                  @if (entry.description) {
-                    <p class="card__desc">{{ entry.description }}</p>
-                  }
+                  <p class="card__added">{{ formatAdded(item.summary.purchasedAt) }}</p>
                 </div>
               </a>
-              <div class="card__actions">
-                <button
-                  class="ms-btn ms-btn--primary card__cart"
-                  [disabled]="isOwned(entry.mealSetId) || busyId() === entry.mealSetId"
-                  (click)="addToCart(entry)">
-                  {{ busyId() === entry.mealSetId ? 'Working…' : 'Add to Cart' }}
-                </button>
-              </div>
-            </div>
-          }
-        </div>
+            }
+          </div>
+        </section>
       }
+
+      <!-- ============ Browse MealSets grid (unowned catalog) ================ -->
+      <section class="browse-section">
+        <header class="browse__head">
+          @if (showShelf()) {
+            <h2 class="section__title">Hungry for new ideas?</h2>
+            <p class="browse__sub">Fresh chef-built packs to add to your notebook.</p>
+          } @else {
+            <h1 class="browse__title">Browse MealSets</h1>
+            <p class="browse__sub">Chef-built meal packs, ready for your notebook.</p>
+          }
+        </header>
+
+        <!-- Price filter: conspicuous segmented control (client-side) -->
+        <div class="seg" role="group" aria-label="Filter by price">
+          <button class="seg__btn" [class.seg__btn--on]="priceFilter() === 'all'"
+            (click)="priceFilter.set('all')">All</button>
+          <button class="seg__btn seg__btn--free" [class.seg__btn--on]="priceFilter() === 'free'"
+            (click)="priceFilter.set('free')">Free</button>
+          <button class="seg__btn" [class.seg__btn--on]="priceFilter() === 'paid'"
+            (click)="priceFilter.set('paid')">Paid</button>
+        </div>
+
+        <!-- Genre chips: multi-select. "All" clears the selection; a card must
+             match EVERY selected genre (intersection). -->
+        <div class="controls">
+          <div class="chips" role="group" aria-label="Filter by genre">
+            <button
+              class="chip"
+              [class.chip--on]="selectedGenres().size === 0"
+              (click)="clearGenres()">
+              All
+            </button>
+            @for (g of svc.genres(); track g) {
+              <button
+                class="chip"
+                [class.chip--on]="selectedGenres().has(g)"
+                (click)="toggleGenre(g)">
+                {{ g }}
+              </button>
+            }
+          </div>
+          <button class="sort" (click)="toggleSort()">
+            Name {{ sortAsc() ? '▲ A–Z' : '▼ Z–A' }}
+          </button>
+        </div>
+
+        @if (svc.loading() && !svc.loaded()) {
+          <p class="state">Loading MealSets…</p>
+        } @else if (svc.error()) {
+          <p class="state state--err">{{ svc.error() }}</p>
+        } @else if (visible().length === 0) {
+          <div class="state">
+            <p>No MealSets match all selected filters.</p>
+            <button class="ms-btn ms-btn--ghost" (click)="clearAllFilters()">Clear filters</button>
+          </div>
+        } @else {
+          <div class="grid">
+            @for (entry of visible(); track entry.mealSetId) {
+              <div class="card">
+                <a class="card__link" [routerLink]="['/set', entry.mealSetId]">
+                  <div class="card__media">
+                    @if (entry.mealSetPic1) {
+                      <img class="card__img" [src]="entry.mealSetPic1" [alt]="entry.name" loading="lazy" />
+                    } @else {
+                      <app-meal-placeholder class="card__noimg" />
+                    }
+                    <!-- Free is called out with a conspicuous corner flag on the image -->
+                    @if (entry.price === 0) {
+                      <span class="flag-free">FREE</span>
+                    }
+                    <span class="card__hint">Click for details</span>
+                  </div>
+                  <div class="card__body">
+                    <div class="card__titlerow">
+                      <h2 class="card__name">
+                        {{ entry.name }}@if (entry.mealCount != null) {
+                          <span class="card__count">({{ entry.mealCount }})</span>
+                        }
+                      </h2>
+                      <span class="card__price" [class.card__price--free]="entry.price === 0">
+                        {{ priceLabel(entry.price) }}
+                      </span>
+                    </div>
+                    @if (entry.authorName) {
+                      <p class="card__author">by {{ entry.authorName }}</p>
+                    }
+                    @if (entry.genres.length) {
+                      <div class="card__genres">
+                        @for (g of entry.genres; track g) {
+                          <span class="card__genre">{{ g }}</span>
+                        }
+                      </div>
+                    }
+                    @if (entry.description) {
+                      <p class="card__desc">{{ entry.description }}</p>
+                    }
+                  </div>
+                </a>
+                <div class="card__actions">
+                  <button
+                    class="ms-btn ms-btn--primary card__cart"
+                    [disabled]="busyId() === entry.mealSetId"
+                    (click)="addToCart(entry)">
+                    {{ busyId() === entry.mealSetId ? 'Working…' : 'Add to Cart' }}
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
     </div>
   `,
   styleUrl: './browse.scss',
@@ -143,15 +192,31 @@ export class BrowseComponent {
   /** mealSetId with an in-flight add-to-cart action (disables just that card). */
   readonly busyId = signal<number | null>(null);
 
-  /** Entries after price + genre filters and name sort — all client-side.
-   *  Genre filter is an intersection: a card must contain EVERY selected genre.
-   *  Price filter ANDs independently. */
+  /** Owned sets for the shelf, in the entitled list's order (newest purchase
+   *  first). Each is resolved against the catalog store for visuals; a set that
+   *  has left the catalog keeps its summary fields (name, genres). */
+  readonly shelf = computed<ShelfItem[]>(() => {
+    if (!this.isAuthenticated()) return [];
+    // Read entries() so the shelf re-resolves visuals once the catalog loads.
+    const entries = this.svc.entries();
+    return this.svc.entitled().map(summary => ({
+      summary,
+      entry: entries.find(e => e.mealSetId === summary.mealSetId),
+    }));
+  });
+
+  readonly showShelf = computed(() => this.shelf().length > 0);
+
+  /** Browse grid: catalog minus owned sets (they live on the shelf), then the
+   *  genre intersection + price filters + name sort — all client-side. */
   readonly visible = computed<MealSetCatalogEntry[]>(() => {
+    const owned = this.svc.entitledIds();
     const genres = this.selectedGenres();
     const price = this.priceFilter();
     const asc = this.sortAsc();
     const list = this.svc
       .entries()
+      .filter(e => !owned.has(e.mealSetId))
       .filter(e =>
         genres.size === 0 ? true : [...genres].every(g => e.genres.includes(g)),
       )
@@ -169,7 +234,7 @@ export class BrowseComponent {
     this.svc.loadCatalog().subscribe({ error: () => {} });
 
     // When the visitor is (or becomes) authenticated, pull entitlements so the
-    // grid can overlay "✓ Owned". Anonymous visitors never trigger this.
+    // shelf can render and owned sets drop out of the grid.
     effect(() => {
       if (this.isAuthenticated()) {
         this.svc.loadEntitled().subscribe({ error: () => {} });
@@ -177,6 +242,28 @@ export class BrowseComponent {
     });
   }
 
+  // ---- Shelf card helpers (catalog entry with summary fallback) --------------
+  cardName(item: ShelfItem): string {
+    return item.entry?.name ?? item.summary.name;
+  }
+
+  cardGenres(item: ShelfItem): string[] {
+    return item.entry?.genres ?? item.summary.genres ?? [];
+  }
+
+  /** "Added Mon D, YYYY" from the ISO purchasedAt; empty if unparseable. */
+  formatAdded(iso: string | undefined): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return `Added ${d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })}`;
+  }
+
+  // ---- Filters --------------------------------------------------------------
   /** Toggle a genre in/out of the multi-select set. */
   toggleGenre(g: string): void {
     this.selectedGenres.update(cur => {
@@ -243,7 +330,7 @@ export class BrowseComponent {
     }
   }
 
-  /** 409 → already owned; refresh entitlements so the card flips to Purchased. */
+  /** 409 → already owned; refresh entitlements so the set moves to the shelf. */
   private handleCartError(err: unknown): void {
     this.busyId.set(null);
     if (err instanceof HttpErrorResponse && err.status === 409) {
