@@ -6,35 +6,36 @@ import { authGuardFn } from '@auth0/auth0-angular';
 //  - Auth-required (authGuardFn → login redirect): /purchase/pending, /purchase/delivered
 //  - 404 → /browse
 //
-// Titles are set per route and applied by Angular's built-in TitleStrategy.
+// The browser tab reads "mealsets.RegiMenu.com" on every route (applied by
+// Angular's built-in TitleStrategy), paired with the RegiMenu logo favicon.
 export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    title: 'MealSets — chef-built meal packs for your RegiMenu notebook',
+    title: 'mealsets.RegiMenu.com',
     loadComponent: () => import('./pages/landing/landing').then(m => m.LandingComponent),
   },
   {
     path: 'browse',
-    title: 'Browse MealSets — RegiMenu',
+    title: 'mealsets.RegiMenu.com',
     loadComponent: () => import('./pages/browse/browse').then(m => m.BrowseComponent),
   },
   {
     path: 'set/:id',
-    title: 'MealSet — RegiMenu',
+    title: 'mealsets.RegiMenu.com',
     loadComponent: () => import('./pages/set-detail/set-detail').then(m => m.SetDetailComponent),
   },
   {
     path: 'purchase/pending',
     canActivate: [authGuardFn],
-    title: 'Preparing your meals… — RegiMenu',
+    title: 'mealsets.RegiMenu.com',
     loadComponent: () =>
       import('./pages/purchase-pending/purchase-pending').then(m => m.PurchasePendingComponent),
   },
   {
     path: 'purchase/delivered',
     canActivate: [authGuardFn],
-    title: 'Meals added to your notebook — RegiMenu',
+    title: 'mealsets.RegiMenu.com',
     loadComponent: () =>
       import('./pages/purchase-delivered/purchase-delivered').then(
         m => m.PurchaseDeliveredComponent,
