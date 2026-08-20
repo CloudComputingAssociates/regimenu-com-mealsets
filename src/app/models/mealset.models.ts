@@ -77,6 +77,10 @@ export interface RedownloadResponse {
 export interface Meal {
   id?: number;
   name?: string;
+  /** Set this meal was sourced from in a set-filtered (mealSetIds) list; absent
+   *  for the caller's own meals. Used to keep ONLY this set's meals out of the
+   *  union the endpoint returns. */
+  mealSetId?: number | null;
   mealImage?: string;
   mealImageThumbnail?: string;
   primaryProteinName?: string | null;

@@ -151,12 +151,17 @@ export class MealSetService {
     return this.http.post<RedownloadResponse>(`${this.baseUrl}/${id}/redownload`, {});
   }
 
-  // ---- Delivered meals (Auth0, owners only) ---------------------------------
-  /** GET /api/meal?mealSetIds={id} — lean rows; used ONLY to count delivered
-   *  meals on the delivered page. */
+  // ---- Set meals (Auth0, owners only) ---------------------------------------
+  /** GET /api/meal?mealSetIds={id} — the endpoint returns a UNION of the
+   *  caller's OWN meals plus this set's meals, so we keep only the rows the
+   *  server tags with this set's id (`mealSetId`). Used for the set-detail
+   *  "What's inside" list and the delivered-page count. limit=100 lifts the
+   *  default 20-row cap so large sets aren't truncated. */
   getSetMeals(id: number): Observable<Meal[]> {
-    return this.http.get<Meal[]>(`${this.apiUrl}/meal`, {
-      params: { mealSetIds: String(id) },
-    });
+    return this.http
+      .get<Meal[]>(`${this.apiUrl}/meal`, {
+        params: { mealSetIds: String(id), limit: '100' },
+      })
+      .pipe(map(meals => (meals ?? []).filter(m => m.mealSetId === id)));
   }
 }
