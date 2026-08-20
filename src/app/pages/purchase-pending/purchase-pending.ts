@@ -13,6 +13,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { MealSetService } from '../../services/mealset.service';
 import { MealSetCatalogEntry } from '../../models/mealset.models';
+import { MealPlaceholderComponent } from '../../components/meal-placeholder/meal-placeholder';
 import { environment } from '../../../environments/environment';
 
 const POLL_MS = 2000;
@@ -21,6 +22,7 @@ const TIMEOUT_MS = 30000;
 @Component({
   selector: 'app-purchase-pending',
   standalone: true,
+  imports: [MealPlaceholderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="ms-container pending">
@@ -28,7 +30,7 @@ const TIMEOUT_MS = 30000;
         @if (cover(); as url) {
           <img class="pending__cover" [src]="url" [alt]="entry()?.name || 'Your MealSet'" />
         } @else {
-          <div class="pending__cover pending__cover--none" aria-hidden="true">◈</div>
+          <app-meal-placeholder class="pending__cover pending__cover--none" />
         }
 
         @if (!timedOut()) {
@@ -36,17 +38,17 @@ const TIMEOUT_MS = 30000;
           <h1 class="pending__title">Preparing your meals…</h1>
           <p class="pending__sub">
             @if (entry(); as e) {
-              Adding <strong>{{ e.name }}</strong> to your binder. This only takes a moment.
+              Adding <strong>{{ e.name }}</strong> to your notebook. This only takes a moment.
             } @else {
-              Adding your MealSet to your binder. This only takes a moment.
+              Adding your MealSet to your notebook. This only takes a moment.
             }
           </p>
         } @else {
           <h1 class="pending__title">Payment received</h1>
           <p class="pending__sub">
-            Your meals will appear in your binder shortly.
+            Your meals will appear in your notebook shortly.
           </p>
-          <a [href]="cockpitUrl" class="ms-btn ms-btn--primary">Check my binder</a>
+          <a [href]="cockpitUrl" class="ms-btn ms-btn--primary">Check my notebook</a>
         }
       </div>
     </div>

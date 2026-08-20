@@ -4,6 +4,12 @@ Public MealSets marketplace SPA (mealsets.regimenu.com). Angular 18+ standalone,
 signals, OnPush, Angular Material, `@auth0/auth0-angular`. Mirrors regi-app
 conventions.
 
+## Working style
+
+- Do NOT ask multiple-choice questions. If something is ambiguous, pick the best
+  approach and proceed, flagging any assumptions in prose. Only ask in plain
+  prose when genuinely blocked.
+
 ## Commit conventions
 
 - Terse commit messages. A one-line subject; a short body only when it adds

@@ -11,7 +11,7 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    title: 'MealSets — chef-built meal packs for your RegiMenu binder',
+    title: 'MealSets — chef-built meal packs for your RegiMenu notebook',
     loadComponent: () => import('./pages/landing/landing').then(m => m.LandingComponent),
   },
   {
@@ -34,7 +34,7 @@ export const routes: Routes = [
   {
     path: 'purchase/delivered',
     canActivate: [authGuardFn],
-    title: 'Meals added to your binder — RegiMenu',
+    title: 'Meals added to your notebook — RegiMenu',
     loadComponent: () =>
       import('./pages/purchase-delivered/purchase-delivered').then(
         m => m.PurchaseDeliveredComponent,

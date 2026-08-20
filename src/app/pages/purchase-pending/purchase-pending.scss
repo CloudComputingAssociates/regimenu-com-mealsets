@@ -22,6 +22,7 @@
   border-radius: var(--ms-radius);
   border: 1px solid var(--ms-border);
   margin-bottom: 10px;
+  overflow: hidden;
 }
 .pending__cover--none {
   display: flex;

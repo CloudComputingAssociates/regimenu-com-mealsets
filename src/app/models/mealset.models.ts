@@ -11,6 +11,8 @@ export interface MealSetCatalogEntry {
   description?: string;
   genre?: string;
   price: number; // dollars; 0 === free
+  mealCount?: number; // number of meals in the set; rendered next to the name when present
+
   mealSetPic1?: string;
   mealSetPic2?: string;
   mealSetPic3?: string;
@@ -62,16 +64,29 @@ export interface CheckoutResponse {
 }
 
 /** POST /api/mealset/{id}/redownload (Auth0) — re-materializes only MISSING
- *  meals from an owned set back into the binder (idempotent; kept/edited meals
+ *  meals from an owned set back into the notebook (idempotent; kept/edited meals
  *  are untouched). 404 when the caller has no purchase of the set. */
 export interface RedownloadResponse {
   materializedCount: number;
 }
 
-/** GET /api/meal?mealSetIds={id} (Auth0, owners only). Lean — used only to count
- *  the meals delivered into the binder. Shape is intentionally permissive. */
+/** GET /api/meal?mealSetIds={id} (Auth0, owners only). Fields mirror regi-api's
+ *  meal.schema Meal. The list response is "lean" — macro TOTALS are present, but
+ *  item-level detail (items[], ingredientNames) may be absent, so those are
+ *  optional and rendered defensively. */
 export interface Meal {
-  mealId?: number;
+  id?: number;
   name?: string;
+  mealImage?: string;
+  mealImageThumbnail?: string;
+  primaryProteinName?: string | null;
+  ingredientNames?: string;
+  totalCalories?: number;
+  totalProteinG?: number;
+  totalFatG?: number;
+  totalCarbG?: number;
+  totalFiberG?: number;
+  totalSodiumMg?: number;
+  items?: { foodName?: string }[];
   [key: string]: unknown;
 }

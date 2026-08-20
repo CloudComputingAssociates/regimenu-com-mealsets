@@ -27,19 +27,19 @@ import { environment } from '../../../environments/environment';
           <h1 class="delivered__title">Finishing up…</h1>
         } @else if (count() > 0) {
           <h1 class="delivered__title">
-            {{ count() }} {{ count() === 1 ? 'meal' : 'meals' }} added to your binder
+            {{ count() }} {{ count() === 1 ? 'meal' : 'meals' }} added to your notebook
           </h1>
           @if (entry()?.name) {
             <p class="delivered__sub">from <strong>{{ entry()?.name }}</strong></p>
           }
         } @else {
-          <h1 class="delivered__title">Your meals are in your binder.</h1>
+          <h1 class="delivered__title">Your meals are in your notebook.</h1>
           @if (entry()?.name) {
             <p class="delivered__sub"><strong>{{ entry()?.name }}</strong> is ready to plan.</p>
           }
         }
 
-        <a [href]="cockpitUrl" class="ms-btn ms-btn--primary delivered__cta">Open my binder</a>
+        <a [href]="cockpitUrl" class="ms-btn ms-btn--primary delivered__cta">Open my notebook</a>
       </div>
     </div>
   `,

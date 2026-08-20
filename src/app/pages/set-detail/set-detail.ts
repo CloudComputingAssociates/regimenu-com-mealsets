@@ -17,13 +17,14 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '@auth0/auth0-angular';
 import { MealSetService } from '../../services/mealset.service';
 import { NotificationService } from '../../services/notification.service';
-import { MealSetCatalogEntry } from '../../models/mealset.models';
-import { environment } from '../../../environments/environment';
+import { MealSetCatalogEntry, Meal } from '../../models/mealset.models';
+import { MealPlaceholderComponent } from '../../components/meal-placeholder/meal-placeholder';
+import { MealListComponent } from '../../components/meal-list/meal-list';
 
 @Component({
   selector: 'app-set-detail',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, MealPlaceholderComponent, MealListComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="ms-container detail">
@@ -48,7 +49,7 @@ import { environment } from '../../../environments/environment';
                   <img class="gallery__img" [src]="m.url" [alt]="e.name" />
                 }
               } @else {
-                <div class="gallery__noimg" aria-hidden="true">◈</div>
+                <app-meal-placeholder class="gallery__noimg" />
               }
             </div>
             @if (media().length > 1) {
@@ -81,10 +82,9 @@ import { environment } from '../../../environments/environment';
 
             <div class="info__cta">
               @if (owned()) {
-                <span class="owned-badge">✓ Owned</span>
-                <a [href]="cockpitUrl" class="ms-btn ms-btn--primary">View in my binder</a>
+                <span class="owned-badge">✓ Purchased</span>
                 <button
-                  class="ms-btn ms-btn--ghost"
+                  class="ms-btn ms-btn--primary"
                   [disabled]="busy()"
                   (click)="onRedownload(e)">
                   {{ busy() ? 'Working…' : 'Re-download meals' }}
@@ -110,6 +110,32 @@ import { environment } from '../../../environments/environment';
             }
           </div>
         </div>
+
+        <!-- Meals in this set. The meal contents (GET /api/meal) are owners-only
+             per the API, so we render the full list once the set is owned and
+             show a locked teaser otherwise. -->
+        <section class="meals-section">
+          <h2 class="meals-section__h">
+            What's inside@if (e.mealCount != null) { <span class="meals-section__count">· {{ e.mealCount }} meals</span> }
+          </h2>
+          @if (owned()) {
+            @if (mealsLoading()) {
+              <p class="meals-section__state">Loading meals…</p>
+            } @else if (meals().length) {
+              <app-meal-list [meals]="meals()" />
+            } @else {
+              <p class="meals-section__state">Your meals are in your notebook.</p>
+            }
+          } @else {
+            <div class="meals-locked">
+              <span class="meals-locked__icon" aria-hidden="true">🔒</span>
+              <p class="meals-locked__text">
+                {{ e.price === 0 ? 'Add this set' : 'Purchase this set' }} to see every meal —
+                photos, ingredients, and full macros.
+              </p>
+            </div>
+          }
+        </section>
 
         <!-- Author block -->
         @if (e.authorName || e.authorBio || e.authorCredentials) {
@@ -154,7 +180,6 @@ export class SetDetailComponent {
   private notify = inject(NotificationService);
 
   private isAuthenticated = toSignal(this.auth.isAuthenticated$, { initialValue: false });
-  readonly cockpitUrl = environment.cockpitUrl;
 
   private readonly setId = signal<number>(NaN);
   readonly entry = signal<MealSetCatalogEntry | undefined>(undefined);
@@ -162,6 +187,10 @@ export class SetDetailComponent {
   readonly owned = signal(false);
   readonly busy = signal(false);
   readonly errorMsg = signal<string | null>(null);
+
+  /** Meals inside the set — owners only (GET /api/meal is auth + entitlement). */
+  readonly meals = signal<Meal[]>([]);
+  readonly mealsLoading = signal(false);
 
   readonly activeIndex = signal(0);
 
@@ -185,6 +214,7 @@ export class SetDetailComponent {
       this.setId.set(id);
       this.activeIndex.set(0);
       this.owned.set(false);
+      this.meals.set([]);
       this.errorMsg.set(null);
 
       if (!Number.isFinite(id)) {
@@ -215,6 +245,22 @@ export class SetDetailComponent {
         });
       }
     });
+
+    // Once the set is owned, load its meals (owners-only endpoint) for the
+    // "What's inside" list. Guard on id so switching sets refetches.
+    effect(() => {
+      const id = this.setId();
+      if (this.owned() && Number.isFinite(id)) {
+        this.mealsLoading.set(true);
+        this.svc.getSetMeals(id).subscribe({
+          next: meals => {
+            this.meals.set(Array.isArray(meals) ? meals : []);
+            this.mealsLoading.set(false);
+          },
+          error: () => this.mealsLoading.set(false),
+        });
+      }
+    });
   }
 
   priceLabel(price: number): string {
@@ -222,7 +268,7 @@ export class SetDetailComponent {
   }
 
   ctaLabel(e: MealSetCatalogEntry): string {
-    return e.price === 0 ? 'Add to my binder' : 'Buy Now';
+    return e.price === 0 ? 'Add to my notebook' : 'Buy Now';
   }
 
   onCta(e: MealSetCatalogEntry): void {
@@ -263,7 +309,7 @@ export class SetDetailComponent {
   }
 
   /** Owned-mode secondary action: re-materialize only the MISSING meals from
-   *  the set back into the binder (idempotent). Mirrors the acquire flow. */
+   *  the set back into the notebook (idempotent). Mirrors the acquire flow. */
   onRedownload(e: MealSetCatalogEntry): void {
     this.errorMsg.set(null);
     this.busy.set(true);
@@ -271,12 +317,12 @@ export class SetDetailComponent {
       next: res => {
         this.busy.set(false);
         if (res.materializedCount > 0) {
-          this.notify.show(`${res.materializedCount} meals added back to your binder.`);
+          this.notify.show(`${res.materializedCount} meals added back to your notebook.`);
           void this.router.navigate(['/purchase/delivered'], {
             queryParams: { setId: e.mealSetId },
           });
         } else {
-          this.notify.show('All of this set\'s meals are already in your binder.', 'info');
+          this.notify.show('All of this set\'s meals are already in your notebook.', 'info');
         }
       },
       error: err => {

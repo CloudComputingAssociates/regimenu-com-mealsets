@@ -199,6 +199,44 @@
   object-fit: cover;
 }
 
+// ---- Meals in this set -----------------------------------------------------
+.meals-section {
+  margin-top: 44px;
+  padding-top: 32px;
+  border-top: 1px solid var(--ms-border);
+}
+.meals-section__h {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 20px;
+}
+.meals-section__count {
+  color: var(--ms-ink-soft);
+  font-weight: 500;
+  font-size: 16px;
+}
+.meals-section__state {
+  color: var(--ms-ink-soft);
+}
+.meals-locked {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 24px;
+  background: var(--ms-surface);
+  border: 1px dashed var(--ms-border);
+  border-radius: var(--ms-radius);
+}
+.meals-locked__icon {
+  font-size: 22px;
+}
+.meals-locked__text {
+  margin: 0;
+  color: var(--ms-ink-soft);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
 @media (max-width: 820px) {
   .detail__grid {
     grid-template-columns: 1fr;

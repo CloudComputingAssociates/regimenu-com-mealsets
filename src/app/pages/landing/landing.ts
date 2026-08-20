@@ -14,11 +14,11 @@ import { RouterLink } from '@angular/router';
       <div class="ms-container hero__inner">
         <p class="hero__eyebrow">The RegiMenu marketplace</p>
         <h1 class="hero__title">
-          MealSets — chef-built, macro-true<br />meal packs for your RegiMenu binder.
+          MealSets — chef-built, macro-true<br />meal packs for your RegiMenu notebook.
         </h1>
         <p class="hero__sub">
           Curated packs of real meals with real macros, built by chefs and coaches.
-          Add a set to your binder and it is ready to plan against in seconds.
+          Add a set to your notebook and it is ready to plan against in seconds.
         </p>
         <div class="hero__cta">
           <a routerLink="/browse" class="ms-btn ms-btn--primary hero__btn">Browse MealSets</a>
@@ -38,9 +38,9 @@ import { RouterLink } from '@angular/router';
         </div>
         <div class="step">
           <span class="step__num">2</span>
-          <h3 class="step__title">Add to your binder</h3>
+          <h3 class="step__title">Add to your notebook</h3>
           <p class="step__body">
-            Free sets drop straight into your binder. Paid packs check out in one
+            Free sets drop straight into your notebook. Paid packs check out in one
             step and land the moment payment clears.
           </p>
         </div>

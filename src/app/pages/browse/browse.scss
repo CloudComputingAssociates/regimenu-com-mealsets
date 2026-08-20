@@ -69,6 +69,41 @@
   border-color: var(--ms-accent);
 }
 
+// ---- Price segmented control (conspicuous Free vs Paid) ---------------------
+.seg {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--ms-surface);
+  border: 1px solid var(--ms-border);
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+.seg__btn {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--ms-ink-soft);
+  border-radius: 999px;
+  padding: 9px 22px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.seg__btn:hover {
+  color: var(--ms-ink);
+}
+.seg__btn--on {
+  background: var(--ms-accent);
+  color: var(--ms-accent-ink);
+  box-shadow: 0 2px 8px rgba(22, 103, 214, 0.25);
+}
+.seg__btn--free.seg__btn--on {
+  background: var(--ms-free);
+  box-shadow: 0 2px 8px rgba(21, 122, 74, 0.28);
+}
+
 .state {
   padding: 48px 0;
   text-align: center;
@@ -93,14 +128,23 @@
   border: 1px solid var(--ms-border);
   border-radius: var(--ms-radius);
   overflow: hidden;
-  color: inherit;
   box-shadow: var(--ms-shadow);
   transition: transform 0.12s ease, box-shadow 0.15s ease;
 }
 .card:hover {
-  text-decoration: none;
   transform: translateY(-3px);
   box-shadow: 0 2px 4px rgba(16, 28, 48, 0.08), 0 14px 34px rgba(16, 28, 48, 0.1);
+}
+// Clickable area (media + body). The Add-to-Cart button lives OUTSIDE this
+// anchor so tapping it never triggers navigation to the detail page.
+.card__link {
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  flex: 1 1 auto;
+}
+.card__link:hover {
+  text-decoration: none;
 }
 .card__media {
   position: relative;
@@ -114,13 +158,23 @@
   display: block;
 }
 .card__noimg {
+  display: block;
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 44px;
-  color: #c6cedd;
+}
+// Conspicuous "FREE" corner flag on the image itself.
+.flag-free {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: var(--ms-free);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 5px 12px;
+  border-radius: 6px;
+  box-shadow: 0 3px 10px rgba(21, 122, 74, 0.35);
 }
 .badge {
   position: absolute;
@@ -132,13 +186,6 @@
   border-radius: 999px;
   backdrop-filter: blur(4px);
 }
-.badge--price {
-  background: rgba(26, 34, 51, 0.82);
-  color: #fff;
-}
-.badge--free {
-  background: var(--ms-free);
-}
 .badge--owned {
   background: #fff;
   color: var(--ms-free);
@@ -146,10 +193,17 @@
 }
 
 .card__body {
-  padding: 15px 16px 18px;
+  padding: 15px 16px 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  flex: 1 1 auto;
+}
+.card__titlerow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
 }
 .card__name {
   font-family: 'Inter', sans-serif;
@@ -157,6 +211,20 @@
   font-weight: 700;
   margin: 0;
   line-height: 1.25;
+}
+.card__count {
+  color: var(--ms-ink-soft);
+  font-weight: 600;
+}
+.card__price {
+  flex: 0 0 auto;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ms-ink);
+  white-space: nowrap;
+}
+.card__price--free {
+  color: var(--ms-free);
 }
 .card__author {
   color: var(--ms-ink-soft);
@@ -183,4 +251,28 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+// ---- Card actions (Add to Cart) --------------------------------------------
+.card__actions {
+  padding: 0 16px 16px;
+}
+.card__cart {
+  width: 100%;
+  padding: 11px 18px;
+  font-size: 15px;
+}
+// "Stippled" disabled state — used when the set is already Purchased.
+.card__cart:disabled {
+  background: repeating-linear-gradient(
+    45deg,
+    #e7ebf2,
+    #e7ebf2 5px,
+    #dfe4ee 5px,
+    #dfe4ee 10px
+  );
+  color: var(--ms-ink-soft);
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 1;
 }

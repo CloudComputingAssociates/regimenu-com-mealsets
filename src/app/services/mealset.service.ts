@@ -145,7 +145,7 @@ export class MealSetService {
   }
 
   /** POST /api/mealset/{id}/redownload — re-materialize only the MISSING meals
-   *  from an owned set into the binder. Idempotent; returns how many were added.
+   *  from an owned set into the notebook. Idempotent; returns how many were added.
    *  404 = the caller has no purchase of this set (surface to caller). */
   redownload(id: number): Observable<RedownloadResponse> {
     return this.http.post<RedownloadResponse>(`${this.baseUrl}/${id}/redownload`, {});
