@@ -29,7 +29,8 @@ import { MyMealsetsComponent } from '../../components/my-mealsets/my-mealsets';
             <div class="band__copy">
               <h1 class="band__title">Hungry for new ideas?</h1>
               <p class="band__sub">
-                Fresh sets from chefs and coaches — find your next week of meals.
+                Fresh, healthy mealsets from coaches, authors, chefs and Registered
+                Dieticians — get more balanced meals to use in your weekly planning.
               </p>
             </div>
             <a routerLink="/browse" class="ms-btn ms-btn--primary band__cta">Browse MealSets</a>

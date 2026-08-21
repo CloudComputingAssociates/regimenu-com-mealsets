@@ -164,20 +164,24 @@ h1, h2, h3 {
   background: var(--ms-surface);
   overflow: hidden;
 }
-// "Click for details" overlay across the bottom of the image.
+// "Click for details" hint — a white bubble centered at the bottom of the
+// image so it stays legible over any background.
 .card__hint {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 18px 12px 8px;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  padding: 5px 14px;
+  border-radius: 999px;
   text-align: center;
-  font-size: 13px;
-  font-weight: 600;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 700;
   letter-spacing: 0.02em;
-  color: #fff;
-  background: linear-gradient(to top, rgba(16, 28, 48, 0.72), rgba(16, 28, 48, 0));
-  opacity: 0.92;
+  color: var(--ms-ink);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 2px 8px rgba(16, 28, 48, 0.18);
+  opacity: 0.95;
   transition: opacity 0.15s ease;
 }
 .card:hover .card__hint {

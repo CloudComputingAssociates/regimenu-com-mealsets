@@ -30,11 +30,21 @@ interface ShelfItem {
             } @else {
               <app-meal-placeholder class="card__noimg" />
             }
-            <span class="badge badge--owned">✓ Owned</span>
+            <!-- Free/price reiterated here too; ✓ Owned is redundant on the shelf. -->
+            @if (item.entry?.price === 0) {
+              <span class="flag-free">FREE</span>
+            }
             <span class="card__hint">Click for details</span>
           </div>
           <div class="card__body">
-            <h2 class="card__name">{{ cardName(item) }}</h2>
+            <div class="card__titlerow">
+              <h2 class="card__name">{{ cardName(item) }}</h2>
+              @if (item.entry; as e) {
+                <span class="card__price" [class.card__price--free]="e.price === 0">
+                  {{ priceLabel(e.price) }}
+                </span>
+              }
+            </div>
             @if (item.entry?.authorName; as author) {
               <p class="card__author">by {{ author }}</p>
             }
@@ -72,6 +82,10 @@ export class MyMealsetsComponent {
 
   cardName(item: ShelfItem): string {
     return item.entry?.name ?? item.summary.name;
+  }
+
+  priceLabel(price: number): string {
+    return price === 0 ? 'Free' : `$${price.toFixed(2)}`;
   }
 
   cardGenres(item: ShelfItem): string[] {

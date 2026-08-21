@@ -86,7 +86,7 @@ import { MealListComponent } from '../../components/meal-list/meal-list';
 
             <div class="info__cta">
               @if (owned()) {
-                <span class="owned-badge">✓ Purchased</span>
+                <span class="owned-badge">✓ Owned</span>
                 <button
                   class="ms-btn ms-btn--primary"
                   [disabled]="busy()"

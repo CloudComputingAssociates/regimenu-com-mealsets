@@ -1,7 +1,7 @@
 // src/app/pages/browse/browse.ts
-// Pure acquisition surface: the full public catalog grid with genre multi-select
-// + Free/Paid filters. Owned sets are EXCLUDED (they live on the "My MealSets"
-// shelf at `/`). Header stays welcoming for anonymous visitors.
+// The full public catalog grid with genre multi-select + Free/Paid filters.
+// Owned sets are shown too, badged ✓ Owned with a disabled Add-to-Cart (they
+// also appear on the "My MealSets" shelf at `/`). Welcoming for anonymous.
 import { Component, ChangeDetectionStrategy, inject, signal, computed, effect } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, Router } from '@angular/router';
@@ -83,6 +83,9 @@ type PriceFilter = 'all' | 'free' | 'paid';
                   @if (entry.price === 0) {
                     <span class="flag-free">FREE</span>
                   }
+                  @if (isOwned(entry.mealSetId)) {
+                    <span class="badge badge--owned">✓ Owned</span>
+                  }
                   <span class="card__hint">Click for details</span>
                 </div>
                 <div class="card__body">
@@ -114,9 +117,9 @@ type PriceFilter = 'all' | 'free' | 'paid';
               <div class="card__actions">
                 <button
                   class="ms-btn ms-btn--primary card__cart"
-                  [disabled]="busyId() === entry.mealSetId"
+                  [disabled]="isOwned(entry.mealSetId) || busyId() === entry.mealSetId"
                   (click)="addToCart(entry)">
-                  {{ busyId() === entry.mealSetId ? 'Working…' : 'Add to Cart' }}
+                  {{ isOwned(entry.mealSetId) ? '✓ Owned' : (busyId() === entry.mealSetId ? 'Working…' : 'Add to Cart') }}
                 </button>
               </div>
             </div>
@@ -140,16 +143,14 @@ export class BrowseComponent {
   /** mealSetId with an in-flight add-to-cart action (disables just that card). */
   readonly busyId = signal<number | null>(null);
 
-  /** Browse grid: catalog minus owned sets (they live on the shelf at `/`), then
+  /** Browse grid: the full catalog (owned sets included, badged ✓ Owned) after
    *  the genre intersection + price filters + name sort — all client-side. */
   readonly visible = computed<MealSetCatalogEntry[]>(() => {
-    const owned = this.svc.entitledIds();
     const genres = this.selectedGenres();
     const price = this.priceFilter();
     const asc = this.sortAsc();
     const list = this.svc
       .entries()
-      .filter(e => !owned.has(e.mealSetId))
       .filter(e =>
         genres.size === 0 ? true : [...genres].every(g => e.genres.includes(g)),
       )
@@ -196,7 +197,7 @@ export class BrowseComponent {
     this.priceFilter.set('all');
   }
 
-  private isOwned(id: number): boolean {
+  isOwned(id: number): boolean {
     return this.isAuthenticated() && this.svc.entitledIds().has(id);
   }
 
