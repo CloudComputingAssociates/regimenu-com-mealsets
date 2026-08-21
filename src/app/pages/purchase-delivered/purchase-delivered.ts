@@ -9,7 +9,7 @@ import {
   signal,
   OnInit,
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MealSetService } from '../../services/mealset.service';
 import { MealSetCatalogEntry } from '../../models/mealset.models';
 import { environment } from '../../../environments/environment';
@@ -17,6 +17,7 @@ import { environment } from '../../../environments/environment';
 @Component({
   selector: 'app-purchase-delivered',
   standalone: true,
+  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="ms-container delivered">
@@ -39,7 +40,10 @@ import { environment } from '../../../environments/environment';
           }
         }
 
-        <a [href]="cockpitUrl" class="ms-btn ms-btn--primary delivered__cta">Open my notebook</a>
+        <div class="delivered__cta">
+          <a [href]="cockpitUrl" class="ms-btn ms-btn--primary">Open my notebook</a>
+          <a routerLink="/" class="ms-btn ms-btn--ghost">Back to my MealSets</a>
+        </div>
       </div>
     </div>
   `,

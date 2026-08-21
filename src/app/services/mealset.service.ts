@@ -113,15 +113,22 @@ export class MealSetService {
 
   // ---- Entitlements (Auth0) -------------------------------------------------
   private readonly _entitled = signal<MealSetSummary[]>([]);
+  private readonly _entitledLoaded = signal(false);
   readonly entitled = this._entitled.asReadonly();
+  /** True once loadEntitled has resolved at least once — lets callers skip a
+   *  refetch and decide shelf-vs-pitch without a flash. */
+  readonly entitledLoaded = this._entitledLoaded.asReadonly();
   readonly entitledIds = computed(() => new Set(this._entitled().map(s => s.mealSetId)));
 
-  /** GET /api/mealset — the caller's owned sets. Overlaid as "✓ Owned" on the
-   *  browse grid. Only call when authenticated. */
+  /** GET /api/mealset — the caller's owned sets, newest purchase first. Only
+   *  call when authenticated. */
   loadEntitled(): Observable<MealSetSummary[]> {
-    return this.http
-      .get<MealSetSummary[]>(this.baseUrl)
-      .pipe(tap(sets => this._entitled.set(sets ?? [])));
+    return this.http.get<MealSetSummary[]>(this.baseUrl).pipe(
+      tap(sets => {
+        this._entitled.set(sets ?? []);
+        this._entitledLoaded.set(true);
+      }),
+    );
   }
 
   /** GET /api/mealset/{id}/owned — authoritative single-set ownership check. */

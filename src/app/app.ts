@@ -1,18 +1,19 @@
 // src/app/app.ts
 // Marketplace shell: a global header (logo, Browse, login/account) and footer
 // wrap the routed pages. Standalone, signals, OnPush — mirrors regi-app.
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed, effect } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterOutlet, RouterLink } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
 import { environment } from '../environments/environment';
+import { MealSetService } from './services/mealset.service';
 import { NotificationComponent } from './components/notification/notification';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, NotificationComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
@@ -23,6 +24,10 @@ import { NotificationComponent } from './components/notification/notification';
             <span class="brand__name">RegiMenu MealSets</span>
           </a>
           <nav class="shell-nav">
+            @if (isOwner()) {
+              <a routerLink="/" class="shell-nav__link" routerLinkActive="shell-nav__link--active"
+                [routerLinkActiveOptions]="{ exact: true }">My MealSets</a>
+            }
             <a routerLink="/browse" class="shell-nav__link">Browse</a>
             @if (isAuthenticated()) {
               <button class="ms-btn ms-btn--ghost shell-nav__btn" (click)="logout()">
@@ -59,9 +64,14 @@ import { NotificationComponent } from './components/notification/notification';
 export class AppComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private svc = inject(MealSetService);
 
   readonly isAuthenticated = toSignal(this.auth.isAuthenticated$, { initialValue: false });
   readonly signupUrl = environment.signupUrl;
+
+  /** Show the "My MealSets" nav link only for authenticated users who actually
+   *  own a set (empty owners see the pitch at `/`, not a shelf). */
+  readonly isOwner = computed(() => this.isAuthenticated() && this.svc.entitled().length > 0);
 
   constructor() {
     // After an Auth0 redirect completes, restore the page the user was on when
@@ -70,6 +80,14 @@ export class AppComponent {
     this.auth.appState$.subscribe((state: { target?: string } | undefined) => {
       if (state?.target) {
         void this.router.navigateByUrl(state.target);
+      }
+    });
+
+    // Warm the entitled list once when authenticated so the nav knows whether
+    // to show "My MealSets" from anywhere. Skips if a page already loaded it.
+    effect(() => {
+      if (this.isAuthenticated() && !this.svc.entitledLoaded()) {
+        this.svc.loadEntitled().subscribe({ error: () => {} });
       }
     });
   }

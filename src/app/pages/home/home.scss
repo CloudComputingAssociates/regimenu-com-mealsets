@@ -1,0 +1,46 @@
+:host {
+  display: block;
+}
+
+.home {
+  padding: 32px 24px 8px;
+}
+
+// Slim salesy band above the shelf — compact, not a hero.
+.band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 20px 24px;
+  margin-bottom: 32px;
+  background: var(--ms-surface);
+  border: 1px solid var(--ms-border);
+  border-radius: var(--ms-radius);
+}
+.band__title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+.band__sub {
+  color: var(--ms-ink-soft);
+  margin: 0;
+  font-size: 15px;
+}
+.band__cta {
+  flex: 0 0 auto;
+}
+
+.my__title {
+  font-size: clamp(24px, 3.4vw, 32px);
+  font-weight: 600;
+  margin: 0 0 20px;
+}
+
+// Blank placeholder while auth/entitlements resolve — reserves height so the
+// header doesn't jump when the real view mounts.
+.home-resolving {
+  min-height: 60vh;
+}

@@ -13,7 +13,8 @@ export const routes: Routes = [
     path: '',
     pathMatch: 'full',
     title: 'mealsets.RegiMenu.com',
-    loadComponent: () => import('./pages/landing/landing').then(m => m.LandingComponent),
+    // State-dependent: pitch for newcomers, "My MealSets" shelf for owners.
+    loadComponent: () => import('./pages/home/home').then(m => m.HomeComponent),
   },
   {
     path: 'browse',

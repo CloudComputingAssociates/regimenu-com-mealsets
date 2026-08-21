@@ -57,6 +57,10 @@
   color: var(--ms-ink);
   text-decoration: none;
 }
+.shell-nav__link--active {
+  color: var(--ms-accent);
+  font-weight: 600;
+}
 .shell-nav__btn {
   padding: 8px 18px;
   font-size: 14px;
