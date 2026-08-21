@@ -81,7 +81,14 @@ import { MealListComponent } from '../../components/meal-list/meal-list';
             }
             <h1 class="info__name">{{ e.name }}</h1>
             @if (e.authorName) {
-              <p class="info__by">by {{ e.authorName }}</p>
+              <p class="info__by">
+                by {{ e.authorName }}
+                @if (hasAuthorDetail(e)) {
+                  <button type="button" class="info__authorlink" (click)="authorOpen.set(true)">
+                    About the author ⓘ
+                  </button>
+                }
+              </p>
             }
 
             <div class="info__cta">
@@ -141,35 +148,40 @@ import { MealListComponent } from '../../components/meal-list/meal-list';
           }
         </section>
 
-        <!-- Author block -->
-        @if (e.authorName || e.authorBio || e.authorCredentials) {
-          <section class="author">
-            <h2 class="author__h">About the author</h2>
-            <div class="author__row">
+        <!-- Author "bloom" modal — opened from the link under the author name. -->
+        @if (authorOpen()) {
+          <div class="author-modal" (click)="authorOpen.set(false)">
+            <div
+              class="author-modal__card"
+              role="dialog"
+              aria-modal="true"
+              aria-label="About the author"
+              (click)="$event.stopPropagation()">
+              <button class="author-modal__close" (click)="authorOpen.set(false)" aria-label="Dismiss">
+                ✕
+              </button>
               @if (e.authorPic) {
-                <img class="author__pic" [src]="e.authorPic" [alt]="e.authorName || 'Author'" />
+                <img class="author-modal__pic" [src]="e.authorPic" [alt]="e.authorName || 'Author'" />
               }
-              <div class="author__text">
-                @if (e.authorName) {
-                  <p class="author__name">{{ e.authorName }}</p>
-                }
-                @if (e.authorCredentials) {
-                  <p class="author__creds">{{ e.authorCredentials }}</p>
-                }
-                @if (e.authorBio) {
-                  <p class="author__bio">{{ e.authorBio }}</p>
-                }
-                @if (e.backLink) {
-                  <a class="author__link" [href]="e.backLink" target="_blank" rel="noopener">
-                    @if (e.backLinkPhoto) {
-                      <img class="author__linkpic" [src]="e.backLinkPhoto" alt="" />
-                    }
-                    More from this author →
-                  </a>
-                }
-              </div>
+              @if (e.authorName) {
+                <h3 class="author-modal__name">{{ e.authorName }}</h3>
+              }
+              @if (e.authorCredentials) {
+                <p class="author-modal__creds">{{ e.authorCredentials }}</p>
+              }
+              @if (e.authorBio) {
+                <p class="author-modal__bio">{{ e.authorBio }}</p>
+              }
+              @if (e.backLink) {
+                <a class="author-modal__link" [href]="e.backLink" target="_blank" rel="noopener">
+                  @if (e.backLinkPhoto) {
+                    <img class="author-modal__linkpic" [src]="e.backLinkPhoto" alt="" />
+                  }
+                  More from this author →
+                </a>
+              }
             </div>
-          </section>
+          </div>
         }
       }
     </div>
@@ -189,6 +201,8 @@ export class SetDetailComponent {
   readonly entry = signal<MealSetCatalogEntry | undefined>(undefined);
   readonly loading = signal(true);
   readonly owned = signal(false);
+  /** "About the author" bloom modal open state. */
+  readonly authorOpen = signal(false);
   readonly busy = signal(false);
   readonly errorMsg = signal<string | null>(null);
 
@@ -220,6 +234,7 @@ export class SetDetailComponent {
       this.owned.set(false);
       this.meals.set([]);
       this.errorMsg.set(null);
+      this.authorOpen.set(false);
 
       if (!Number.isFinite(id)) {
         this.entry.set(undefined);
@@ -269,6 +284,11 @@ export class SetDetailComponent {
 
   priceLabel(price: number): string {
     return price === 0 ? 'Free' : `$${price.toFixed(2)}`;
+  }
+
+  /** Whether there's author detail worth opening the bloom modal for. */
+  hasAuthorDetail(e: MealSetCatalogEntry): boolean {
+    return !!(e.authorBio || e.authorCredentials || e.authorPic || e.backLink);
   }
 
   ctaLabel(e: MealSetCatalogEntry): string {

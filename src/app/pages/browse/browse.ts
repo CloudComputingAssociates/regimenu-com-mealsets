@@ -79,10 +79,6 @@ type PriceFilter = 'all' | 'free' | 'paid';
                   } @else {
                     <app-meal-placeholder class="card__noimg" />
                   }
-                  <!-- Free is called out with a conspicuous corner flag on the image -->
-                  @if (entry.price === 0) {
-                    <span class="flag-free">FREE</span>
-                  }
                   @if (isOwned(entry.mealSetId)) {
                     <span class="badge badge--owned">✓ Owned</span>
                   }

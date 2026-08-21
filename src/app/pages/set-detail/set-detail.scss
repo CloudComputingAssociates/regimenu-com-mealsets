@@ -150,57 +150,126 @@
 }
 
 // ---- Author ----------------------------------------------------------------
-.author {
-  margin: 48px 0 8px;
-  padding-top: 32px;
-  border-top: 1px solid var(--ms-border);
-}
-.author__h {
-  font-size: 20px;
+// ---- "About the author" trigger link ---------------------------------------
+.info__authorlink {
+  display: inline;
+  margin-left: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
   font-weight: 600;
-  margin: 0 0 20px;
+  color: var(--ms-accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
-.author__row {
+.info__authorlink:hover {
+  color: #1257ba;
+}
+
+// ---- Author "bloom" modal --------------------------------------------------
+.author-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
   display: flex;
-  gap: 22px;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(16, 28, 48, 0.5);
+  backdrop-filter: blur(3px);
+  animation: fade-in 0.16s ease;
 }
-.author__pic {
-  width: 96px;
-  height: 96px;
+.author-modal__card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  max-height: 88vh;
+  overflow-y: auto;
+  text-align: center;
+  background: #fff;
+  border: 2px solid #f5c518;
+  border-radius: 18px;
+  padding: 30px 28px 28px;
+  animation: bloom-in 0.2s cubic-bezier(0.2, 0.8, 0.3, 1.2), glow-pulse 2.6s ease-in-out infinite;
+}
+.author-modal__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: var(--ms-surface);
+  color: var(--ms-ink-soft);
+  font-size: 14px;
+  cursor: pointer;
+}
+.author-modal__close:hover {
+  background: #e9edf4;
+  color: var(--ms-ink);
+}
+.author-modal__pic {
+  width: 104px;
+  height: 104px;
   border-radius: 50%;
   object-fit: cover;
-  flex: 0 0 auto;
+  margin: 0 auto 14px;
+  border: 3px solid #fde7a6;
 }
-.author__name {
+.author-modal__name {
   font-weight: 700;
-  font-size: 18px;
-  margin: 0 0 2px;
+  font-size: 20px;
+  margin: 0 0 4px;
 }
-.author__creds {
+.author-modal__creds {
   color: var(--ms-accent);
   font-size: 14px;
   font-weight: 600;
-  margin: 0 0 10px;
+  margin: 0 0 14px;
 }
-.author__bio {
+.author-modal__bio {
   color: var(--ms-ink-soft);
   line-height: 1.6;
-  margin: 0 0 12px;
-  max-width: 640px;
+  font-size: 15px;
+  margin: 0 0 16px;
+  text-align: left;
 }
-.author__link {
+.author-modal__link {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-weight: 600;
   font-size: 14px;
 }
-.author__linkpic {
+.author-modal__linkpic {
   width: 28px;
   height: 28px;
   border-radius: 6px;
   object-fit: cover;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes bloom-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+// Gently pulsing yellow glow around the bloom card.
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.22), 0 0 26px rgba(245, 197, 24, 0.4),
+      0 20px 60px rgba(16, 28, 48, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.4), 0 0 46px rgba(245, 197, 24, 0.66),
+      0 20px 60px rgba(16, 28, 48, 0.3);
+  }
 }
 
 // ---- Meals in this set -----------------------------------------------------

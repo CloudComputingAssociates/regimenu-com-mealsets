@@ -198,22 +198,6 @@ h1, h2, h3 {
   width: 100%;
   height: 100%;
 }
-// Conspicuous "FREE" corner flag on the image itself.
-.flag-free {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: var(--ms-free);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  padding: 5px 12px;
-  border-radius: 6px;
-  // White outline so the green flag stays legible over green imagery.
-  border: 2px solid #fff;
-  box-shadow: 0 3px 10px rgba(21, 122, 74, 0.35);
-}
 .badge {
   position: absolute;
   top: 10px;

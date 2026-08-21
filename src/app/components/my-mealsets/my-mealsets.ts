@@ -30,10 +30,6 @@ interface ShelfItem {
             } @else {
               <app-meal-placeholder class="card__noimg" />
             }
-            <!-- Free/price reiterated here too; ✓ Owned is redundant on the shelf. -->
-            @if (item.entry?.price === 0) {
-              <span class="flag-free">FREE</span>
-            }
             <span class="card__hint">Click for details</span>
           </div>
           <div class="card__body">
