@@ -30,7 +30,7 @@ import { MyMealsetsComponent } from '../../components/my-mealsets/my-mealsets';
               <h1 class="band__title">Hungry for new ideas?</h1>
               <p class="band__sub">
                 Fresh, healthy mealsets from coaches, authors, chefs and Registered
-                Dieticians — get more balanced meals to use in your weekly planning.
+                Dieticians - ready to use, today!
               </p>
             </div>
             <a routerLink="/browse" class="ms-btn ms-btn--primary band__cta">Browse MealSets</a>
